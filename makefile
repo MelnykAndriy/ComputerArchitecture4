@@ -3,12 +3,12 @@
 #
 
 binary_dir ?= build
-executable_name ?= lab4
+executable_name ?= server
 
-headers = myThread.h
-source_files = main.cpp myThread.cpp
+headers ?= thread/myThread.h socket/TCPSocket.h connection/connection.h
+source_files ?= server.cpp thread/myThread.cpp socket/TCPSocket.cpp
 
-flags = -lpthread -std=c++11
+flags ?= -lpthread -std=c++11 -lboost_serialization
 
 
 ifndef suppress_warnings 
@@ -21,7 +21,10 @@ all : run
 
 
 run : executable
-	./$(executable_name) 
+	./$(executable_name)
+
+valgrind_run: executable
+	valgrind --track-origins=yes  ./$(executable_name)
 
 .PHONY :executable
 
