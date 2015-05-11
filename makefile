@@ -9,7 +9,7 @@ run_args ?= -p 4242
 headers ?= thread/myThread.h socket/TCPSocket.h connection/connection.h
 source_files ?= server.cpp thread/myThread.cpp socket/TCPSocket.cpp
 
-flags += -lpthread -std=c++11 -lboost_serialization
+flags += -lpthread -std=c++11 -lboost_serialization -lboost_program_options
 
 
 ifndef suppress_warnings 
