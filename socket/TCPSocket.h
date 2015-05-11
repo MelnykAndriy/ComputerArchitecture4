@@ -44,7 +44,7 @@ private:
 
 class InTCPSocket : public TCPSocket {
 public:
-    InTCPSocket(unsigned short port);
+    InTCPSocket(unsigned short port, int backlog = 10);
     unique_ptr<TCPSocket> accept_connection();
 
 private:

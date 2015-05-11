@@ -29,9 +29,8 @@ ReadEntity serializedRead(TCPSocket& readSocket) {
     do {
         memset(buffer, 0, 256);
         number_of_bytes_read = readSocket.readData(buffer, 255);
-        if (number_of_bytes_read != 0)
-            data += buffer;
-    } while ( number_of_bytes_read != 0 or number_of_bytes_read == 255 );
+        data += buffer;
+    } while ( number_of_bytes_read == 255 );
     istringstream serializable_stream(data.c_str());
     boost::archive::text_iarchive in(serializable_stream);
     in >> entity;

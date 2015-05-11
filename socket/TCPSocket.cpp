@@ -41,11 +41,10 @@ ssize_t TCPSocket::readData(void *buffer, size_t size) {
 
 
 TCPSocket::~TCPSocket() {
-    cout << "close : " << socket_descriptor << endl;
     close(socket_descriptor);
 }
 
-InTCPSocket::InTCPSocket(unsigned short port) : TCPSocket(), port(port) {
+InTCPSocket::InTCPSocket(unsigned short port, int backlog) : TCPSocket(), port(port) {
 
     sockaddr_in server_address;
     memset(&server_address, 0, sizeof(server_address));
@@ -53,13 +52,10 @@ InTCPSocket::InTCPSocket(unsigned short port) : TCPSocket(), port(port) {
     server_address.sin_addr.s_addr = INADDR_ANY;
     server_address.sin_port = htons(port);
     if ( bind(getDescriptor(), (struct sockaddr *) &server_address, sizeof(server_address)) < 0) {
-        cout << errno;
         throw SocketError("Bind error.", errno);
     }
-    listen(getDescriptor(), 10);
+    listen(getDescriptor(), backlog);
 }
-
-
 
 unique_ptr<TCPSocket> InTCPSocket::accept_connection() {
     sockaddr_in client_address;
@@ -73,8 +69,6 @@ unique_ptr<TCPSocket> InTCPSocket::accept_connection() {
     unique_ptr<TCPSocket> new_socket_ptr(new TCPSocket(new_socket_descriptor));
     return new_socket_ptr;
 }
-
-
 
 const char*SocketError::what() const noexcept (true) {
     return this->msg.c_str();
