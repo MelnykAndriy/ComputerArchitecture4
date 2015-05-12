@@ -55,7 +55,7 @@ clean :
 
 .PHONY : run-tests
 
-run-tests : execute-tests clean-test-suite
+run-tests : execute-tests
 
 
 clean-test-suite :
@@ -66,5 +66,5 @@ execute-tests : build-tests
 
 build-tests : $(tests_dir)/$(test_runner)
 
-$(tests_dir)/$(test_runner) : build_files $(shell find $(tests_dir) -name "*.cpp")
+$(tests_dir)/$(test_runner) : $(shell find $(tests_dir) -name "*.cpp")
 	( cd $(tests_dir) ; g++ $(addprefix ../, $(source_files) $(shell find $(tests_dir) -name "*.cpp"))  $(flags) $(additional_flags) -lboost_unit_test_framework -o $(test_runner))
