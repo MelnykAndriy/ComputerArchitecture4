@@ -15,12 +15,12 @@ using namespace std;
 class SocketError : public exception {
 public:
     SocketError(string msg = string("Something wrong with tcp socket."), int error_number=-1)
-            : msg(msg), error_number(error_number) {}
+            : error_number(error_number), msg(msg) {}
     virtual const char *what() const noexcept (true) override;
-    const int errorNumber() const;
+    const int error_number;
 private:
     string msg;
-    const int error_number;
+
 };
 
 class TCPSocket {

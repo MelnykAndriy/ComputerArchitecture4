@@ -6,10 +6,10 @@ binary_dir ?= build
 executable_name ?= server
 run_args ?= -p 4242
 
-headers ?= thread/myThread.h socket/TCPSocket.h connection/connection.h
+headers ?= thread/myThread.h socket/TCPSocket.h connection/connection.h tcp_server/asioTcpServer.h
 source_files ?= server.cpp thread/myThread.cpp socket/TCPSocket.cpp
 
-flags += -lpthread -std=c++11 -lboost_serialization -lboost_program_options
+flags += -lpthread -std=c++11 -lboost_serialization -lboost_program_options -lboost_system
 
 
 ifndef suppress_warnings 

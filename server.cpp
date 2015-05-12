@@ -1,23 +1,38 @@
 
-
-#include <iostream>
-#include "socket/TCPSocket.h"
-#include "thread/myThread.h"
-#include "connection/connection.h"
-
-#include <boost/serialization/vector.hpp>
-#include <boost/program_options.hpp>
-
-using namespace std;
-using namespace boost::program_options;
-using namespace concurrent;
-
 #define DEFAULT_PORT 4242
 #define THREADING_FORK 1
 #define THREADING_PTHREAD 2
-#define THREADING_ASIO 3
+#define ASIO_ASYNC 3
 
-#define THREADING THREADING_PTHREAD
+#ifndef SERVER_MODEL
+#define SERVER_MODEL ASIO_ASYNC
+#endif
+
+#include <iostream>
+#include <boost/serialization/vector.hpp>
+#include <boost/program_options.hpp>
+#include "connection/connection.h"
+
+#if (SERVER_MODEL == THREADING_FORK || SERVER_MODEL == THREADING_PTHREAD)
+
+#include "socket/TCPSocket.h"
+#include "thread/myThread.h"
+
+using namespace concurrent;
+
+#elif (SERVER_MODEL == ASIO_ASYNC)
+#include "tcp_server/asioTcpServer.h"
+#endif
+
+using namespace std;
+using namespace boost::program_options;
+
+template <class Socket>
+void handleRequest(Socket &socket) {
+    vector<double> provided_vector = serializedRead< vector<double> >(socket);
+    sort(begin(provided_vector), end(provided_vector));
+    serializedWrite(socket, provided_vector);
+}
 
 int main(int argc, char *argv[]) {
     unsigned short port;
@@ -36,43 +51,36 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-
+#if (SERVER_MODEL == THREADING_FORK || SERVER_MODEL == THREADING_PTHREAD)
     InTCPSocket server_socket(port);
 
     while (true) {
         auto new_socket = server_socket.accept_connection();
 
-#if (THREADING == THREADING_FORK)
+#if (SERVER_MODEL == THREADING_FORK)
         if ( !fork() ) {
-            vector<double> provided_vector = serializedRead< vector<double> >(*new_socket.get());
-            sort(begin(provided_vector), end(provided_vector));
-            serializedWrite(*new_socket.get(), provided_vector);
+            handleRequest(*new_socket.get());
             break;
         }
-
-#elif (THREADING == THREADING_PTHREAD)
+#elif (SERVER_MODEL == THREADING_PTHREAD)
         auto socket_ptr = new unique_ptr<TCPSocket>(std::move(new_socket));
         Thread task_thread([](void* socket)->void* {
             unique_ptr<TCPSocket>* data_socket = (unique_ptr<TCPSocket>*)socket;
-            vector<double> provided_vector = serializedRead< vector<double> >(*(*data_socket).get());
-            sort(begin(provided_vector), end(provided_vector));
-            serializedWrite(*(*data_socket).get(), provided_vector);
+            handleRequest(*(*data_socket).get());
             delete data_socket;
             return nullptr;
         }, socket_ptr);
         task_thread.deatch();
+#endif
+    }
+#elif (SERVER_MODEL == ASIO_ASYNC)
 
-#elif (THREADING == THREADING_ASIO)
-
-        // asio here
-
+    AsioTCP::TCPServer server(port, [] (AsioTCP::TCPServer::socket_ptr socket)->void {
+        handleRequest(*socket);
+    });
+    server.run();
 
 #endif
-
-
-
-    }
-
 
     return 0;
 }

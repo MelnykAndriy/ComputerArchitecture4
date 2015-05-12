@@ -3,14 +3,12 @@
 //
 
 
-
 #include "TCPSocket.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <netdb.h>
 #include <cstring>
-#include <iostream>
 
 
 int TCPSocket::getDescriptor() {
@@ -72,10 +70,6 @@ unique_ptr<TCPSocket> InTCPSocket::accept_connection() {
 
 const char*SocketError::what() const noexcept (true) {
     return this->msg.c_str();
-}
-
-const int SocketError::errorNumber() const {
-    return error_number;
 }
 
 OutTCPSocket::OutTCPSocket(string host, unsigned short port) : host(host), port(port){
