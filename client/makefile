@@ -4,7 +4,8 @@
 
 executable_name ?= client
 headers = ../socket/TCPSocket.h ../connection/connection.h
-source_files = client.cpp ../socket/TCPSocket.cpp
+source_files = ../socket/TCPSocket.cpp
+main_file = client.cpp
 run_args = -l 25
 
 include ../makefile
